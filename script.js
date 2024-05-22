@@ -1,43 +1,27 @@
-// JavaScriptを書くところ
-
 function get1d(n){
     return [...Array(n)].map(() => 0);
 }
 
 function get2d(n){
     return [...Array(n)].map(() => get1d(n));
-}    
+}
 
 var board = get2d(1);
 var i_selected = -1;
 var j_selected = -1;
+var i_last = -1;
+var j_last = -1;
 var e_score = 0;
 var b_score = 0;
-
-function set_table(board){
-    let n = board.length;
-    for (let i=0; i < n; i++){
-        for (let j=0; j < n; j++){
-            board[i][j] = Math.floor(Math.random() * 5);
-            //if (j % 2 == 1) board[i][j] = 2;
-            //if (j % 2 == 0) board[i][j] = 4;
-            //if (i < 3 && j < 3) board[i][j] = 2;
-            //if (i < 3 && j >= 3) board[i][j] = 4;
-            //if (i >= 3 && j < 3) board[i][j] = 4;
-            //if (i >= 3 && j >= 3) board[i][j] = 2;
-        }
-    }
-}
+var n_open = -1;
 
 function offset_add(m, i, j, x){
     let n = m.length;
-    if (i < 0 || i > n - 1 || j < 0 || j > n - 1){
-        return
-    }
+    if (i < 0 || i > n - 1 || j < 0 || j > n - 1) return;
     m[i][j] += x;
 }
 
-function compute_emode(board, emode){
+function compute_emode(board, m){
     let n = board.length;
     for (let i = 0; i < n; i++){
         for (let j = 0; j < n; j++){
@@ -45,84 +29,84 @@ function compute_emode(board, emode){
             let i2 = i * 2 + 1;
             let j2 = j * 2 + 1;
             switch(z){
-                case 1:
-                    offset_add(emode, i2-1, j2, 1);
-                    offset_add(emode, i2+1, j2, 1);
-                    offset_add(emode, i2, j2-1, -1);
-                    offset_add(emode, i2, j2+1, -1);
-                    offset_add(emode, i2-2, j2, 1);
-                    offset_add(emode, i2+2, j2, 1);
-                    offset_add(emode, i2, j2-2, -1);
-                    offset_add(emode, i2, j2+2, -1);
-                    offset_add(emode, i2-2, j2-1, 1/2);
-                    offset_add(emode, i2+2, j2+1, 1/2);
-                    offset_add(emode, i2-2, j2+1, 1/2);
-                    offset_add(emode, i2+2, j2-1, 1/2);
-                    offset_add(emode, i2-1, j2-2, -1/2);
-                    offset_add(emode, i2+1, j2+2, -1/2);
-                    offset_add(emode, i2-1, j2+2, -1/2);
-                    offset_add(emode, i2+1, j2-2, -1/2);
-                    break;
-                case 3:
-                    offset_add(emode, i2-1, j2, -1);
-                    offset_add(emode, i2+1, j2, -1);
-                    offset_add(emode, i2, j2-1, 1);
-                    offset_add(emode, i2, j2+1, 1);
-                    offset_add(emode, i2-2, j2, -1);
-                    offset_add(emode, i2+2, j2, -1);
-                    offset_add(emode, i2, j2-2, 1);
-                    offset_add(emode, i2, j2+2, 1);
-                    offset_add(emode, i2-2, j2-1, -1/2);
-                    offset_add(emode, i2+2, j2+1, -1/2);
-                    offset_add(emode, i2-2, j2+1, -1/2);
-                    offset_add(emode, i2+2, j2-1, -1/2);
-                    offset_add(emode, i2-1, j2-2, 1/2);
-                    offset_add(emode, i2+1, j2+2, 1/2);
-                    offset_add(emode, i2-1, j2+2, 1/2);
-                    offset_add(emode, i2+1, j2-2, 1/2);
-                    break;
-                case 2:
-                    offset_add(emode, i2-1, j2-1, -1);
-                    offset_add(emode, i2+1, j2+1, -1);
-                    offset_add(emode, i2-1, j2+1, 1);
-                    offset_add(emode, i2+1, j2-1, 1);
-                    offset_add(emode, i2-2, j2-2, -1);
-                    offset_add(emode, i2+2, j2+2, -1);
-                    offset_add(emode, i2-2, j2+2, 1);
-                    offset_add(emode, i2+2, j2-2, 1);
-                    offset_add(emode, i2-2, j2-1, -1/2);
-                    offset_add(emode, i2+2, j2+1, -1/2);
-                    offset_add(emode, i2-2, j2+1, 1/2);
-                    offset_add(emode, i2+2, j2-1, 1/2);
-                    offset_add(emode, i2-1, j2-2, -1/2);
-                    offset_add(emode, i2+1, j2+2, -1/2);
-                    offset_add(emode, i2-1, j2+2, 1/2);
-                    offset_add(emode, i2+1, j2-2, 1/2);
-                    break;
-                case 4:
-                    offset_add(emode, i2-1, j2-1, 1);
-                    offset_add(emode, i2+1, j2+1, 1);
-                    offset_add(emode, i2-1, j2+1, -1);
-                    offset_add(emode, i2+1, j2-1, -1);
-                    offset_add(emode, i2-2, j2-2, 1);
-                    offset_add(emode, i2+2, j2+2, 1);
-                    offset_add(emode, i2-2, j2+2, -1);
-                    offset_add(emode, i2+2, j2-2, -1);
-                    offset_add(emode, i2-2, j2-1, 1/2);
-                    offset_add(emode, i2+2, j2+1, 1/2);
-                    offset_add(emode, i2-2, j2+1, -1/2);
-                    offset_add(emode, i2+2, j2-1, -1/2);
-                    offset_add(emode, i2-1, j2-2, 1/2);
-                    offset_add(emode, i2+1, j2+2, 1/2);
-                    offset_add(emode, i2-1, j2+2, -1/2);
-                    offset_add(emode, i2+1, j2-2, -1/2);
-                    break;
+            case 1:
+                offset_add(m, i2-1, j2, 1);
+                offset_add(m, i2+1, j2, 1);
+                offset_add(m, i2, j2-1, -1);
+                offset_add(m, i2, j2+1, -1);
+                offset_add(m, i2-2, j2, 1);
+                offset_add(m, i2+2, j2, 1);
+                offset_add(m, i2, j2-2, -1);
+                offset_add(m, i2, j2+2, -1);
+                offset_add(m, i2-2, j2-1, 1/2);
+                offset_add(m, i2+2, j2+1, 1/2);
+                offset_add(m, i2-2, j2+1, 1/2);
+                offset_add(m, i2+2, j2-1, 1/2);
+                offset_add(m, i2-1, j2-2, -1/2);
+                offset_add(m, i2+1, j2+2, -1/2);
+                offset_add(m, i2-1, j2+2, -1/2);
+                offset_add(m, i2+1, j2-2, -1/2);
+                break;
+            case 3:
+                offset_add(m, i2-1, j2, -1);
+                offset_add(m, i2+1, j2, -1);
+                offset_add(m, i2, j2-1, 1);
+                offset_add(m, i2, j2+1, 1);
+                offset_add(m, i2-2, j2, -1);
+                offset_add(m, i2+2, j2, -1);
+                offset_add(m, i2, j2-2, 1);
+                offset_add(m, i2, j2+2, 1);
+                offset_add(m, i2-2, j2-1, -1/2);
+                offset_add(m, i2+2, j2+1, -1/2);
+                offset_add(m, i2-2, j2+1, -1/2);
+                offset_add(m, i2+2, j2-1, -1/2);
+                offset_add(m, i2-1, j2-2, 1/2);
+                offset_add(m, i2+1, j2+2, 1/2);
+                offset_add(m, i2-1, j2+2, 1/2);
+                offset_add(m, i2+1, j2-2, 1/2);
+                break;
+            case 2:
+                offset_add(m, i2-1, j2-1, -1);
+                offset_add(m, i2+1, j2+1, -1);
+                offset_add(m, i2-1, j2+1, 1);
+                offset_add(m, i2+1, j2-1, 1);
+                offset_add(m, i2-2, j2-2, -1);
+                offset_add(m, i2+2, j2+2, -1);
+                offset_add(m, i2-2, j2+2, 1);
+                offset_add(m, i2+2, j2-2, 1);
+                offset_add(m, i2-2, j2-1, -1/2);
+                offset_add(m, i2+2, j2+1, -1/2);
+                offset_add(m, i2-2, j2+1, 1/2);
+                offset_add(m, i2+2, j2-1, 1/2);
+                offset_add(m, i2-1, j2-2, -1/2);
+                offset_add(m, i2+1, j2+2, -1/2);
+                offset_add(m, i2-1, j2+2, 1/2);
+                offset_add(m, i2+1, j2-2, 1/2);
+                break;
+            case 4:
+                offset_add(m, i2-1, j2-1, 1);
+                offset_add(m, i2+1, j2+1, 1);
+                offset_add(m, i2-1, j2+1, -1);
+                offset_add(m, i2+1, j2-1, -1);
+                offset_add(m, i2-2, j2-2, 1);
+                offset_add(m, i2+2, j2+2, 1);
+                offset_add(m, i2-2, j2+2, -1);
+                offset_add(m, i2+2, j2-2, -1);
+                offset_add(m, i2-2, j2-1, 1/2);
+                offset_add(m, i2+2, j2+1, 1/2);
+                offset_add(m, i2-2, j2+1, -1/2);
+                offset_add(m, i2+2, j2-1, -1/2);
+                offset_add(m, i2-1, j2-2, 1/2);
+                offset_add(m, i2+1, j2+2, 1/2);
+                offset_add(m, i2-1, j2+2, -1/2);
+                offset_add(m, i2+1, j2-2, -1/2);
+                break;
             }
         }
     }
 }
 
-function compute_bmode(board, bmode){
+function compute_bmode(board, m){
     let n = board.length;
     for (let i = 0; i < n; i++){
         for (let j = 0; j < n; j++){
@@ -130,78 +114,78 @@ function compute_bmode(board, bmode){
             let i2 = i * 2 + 1;
             let j2 = j * 2 + 1;
             switch(z){
-                case 2:
-                    offset_add(bmode, i2-1, j2, 1);
-                    offset_add(bmode, i2+1, j2, 1);
-                    offset_add(bmode, i2, j2-1, -1);
-                    offset_add(bmode, i2, j2+1, -1);
-                    offset_add(bmode, i2-2, j2, 1);
-                    offset_add(bmode, i2+2, j2, 1);
-                    offset_add(bmode, i2, j2-2, -1);
-                    offset_add(bmode, i2, j2+2, -1);
-                    offset_add(bmode, i2-2, j2-1, 1/2);
-                    offset_add(bmode, i2+2, j2+1, 1/2);
-                    offset_add(bmode, i2-2, j2+1, 1/2);
-                    offset_add(bmode, i2+2, j2-1, 1/2);
-                    offset_add(bmode, i2-1, j2-2, -1/2);
-                    offset_add(bmode, i2+1, j2+2, -1/2);
-                    offset_add(bmode, i2-1, j2+2, -1/2);
-                    offset_add(bmode, i2+1, j2-2, -1/2);
-                    break;
-                case 4:
-                    offset_add(bmode, i2-1, j2, -1);
-                    offset_add(bmode, i2+1, j2, -1);
-                    offset_add(bmode, i2, j2-1, 1);
-                    offset_add(bmode, i2, j2+1, 1);
-                    offset_add(bmode, i2-2, j2, -1);
-                    offset_add(bmode, i2+2, j2, -1);
-                    offset_add(bmode, i2, j2-2, 1);
-                    offset_add(bmode, i2, j2+2, 1);
-                    offset_add(bmode, i2-2, j2-1, -1/2);
-                    offset_add(bmode, i2+2, j2+1, -1/2);
-                    offset_add(bmode, i2-2, j2+1, -1/2);
-                    offset_add(bmode, i2+2, j2-1, -1/2);
-                    offset_add(bmode, i2-1, j2-2, 1/2);
-                    offset_add(bmode, i2+1, j2+2, 1/2);
-                    offset_add(bmode, i2-1, j2+2, 1/2);
-                    offset_add(bmode, i2+1, j2-2, 1/2);
-                    break;
-                case 3:
-                    offset_add(bmode, i2-1, j2-1, -1);
-                    offset_add(bmode, i2+1, j2+1, -1);
-                    offset_add(bmode, i2-1, j2+1, 1);
-                    offset_add(bmode, i2+1, j2-1, 1);
-                    offset_add(bmode, i2-2, j2-2, -1);
-                    offset_add(bmode, i2+2, j2+2, -1);
-                    offset_add(bmode, i2-2, j2+2, 1);
-                    offset_add(bmode, i2+2, j2-2, 1);
-                    offset_add(bmode, i2-2, j2-1, -1/2);
-                    offset_add(bmode, i2+2, j2+1, -1/2);
-                    offset_add(bmode, i2-2, j2+1, 1/2);
-                    offset_add(bmode, i2+2, j2-1, 1/2);
-                    offset_add(bmode, i2-1, j2-2, -1/2);
-                    offset_add(bmode, i2+1, j2+2, -1/2);
-                    offset_add(bmode, i2-1, j2+2, 1/2);
-                    offset_add(bmode, i2+1, j2-2, 1/2);
-                    break;
-                case 1:
-                    offset_add(bmode, i2-1, j2-1, 1);
-                    offset_add(bmode, i2+1, j2+1, 1);
-                    offset_add(bmode, i2-1, j2+1, -1);
-                    offset_add(bmode, i2+1, j2-1, -1);
-                    offset_add(bmode, i2-2, j2-2, 1);
-                    offset_add(bmode, i2+2, j2+2, 1);
-                    offset_add(bmode, i2-2, j2+2, -1);
-                    offset_add(bmode, i2+2, j2-2, -1);
-                    offset_add(bmode, i2-2, j2-1, 1/2);
-                    offset_add(bmode, i2+2, j2+1, 1/2);
-                    offset_add(bmode, i2-2, j2+1, -1/2);
-                    offset_add(bmode, i2+2, j2-1, -1/2);
-                    offset_add(bmode, i2-1, j2-2, 1/2);
-                    offset_add(bmode, i2+1, j2+2, 1/2);
-                    offset_add(bmode, i2-1, j2+2, -1/2);
-                    offset_add(bmode, i2+1, j2-2, -1/2);
-                    break;
+            case 2:
+                offset_add(m, i2-1, j2, 1);
+                offset_add(m, i2+1, j2, 1);
+                offset_add(m, i2, j2-1, -1);
+                offset_add(m, i2, j2+1, -1);
+                offset_add(m, i2-2, j2, 1);
+                offset_add(m, i2+2, j2, 1);
+                offset_add(m, i2, j2-2, -1);
+                offset_add(m, i2, j2+2, -1);
+                offset_add(m, i2-2, j2-1, 1/2);
+                offset_add(m, i2+2, j2+1, 1/2);
+                offset_add(m, i2-2, j2+1, 1/2);
+                offset_add(m, i2+2, j2-1, 1/2);
+                offset_add(m, i2-1, j2-2, -1/2);
+                offset_add(m, i2+1, j2+2, -1/2);
+                offset_add(m, i2-1, j2+2, -1/2);
+                offset_add(m, i2+1, j2-2, -1/2);
+                break;
+            case 4:
+                offset_add(m, i2-1, j2, -1);
+                offset_add(m, i2+1, j2, -1);
+                offset_add(m, i2, j2-1, 1);
+                offset_add(m, i2, j2+1, 1);
+                offset_add(m, i2-2, j2, -1);
+                offset_add(m, i2+2, j2, -1);
+                offset_add(m, i2, j2-2, 1);
+                offset_add(m, i2, j2+2, 1);
+                offset_add(m, i2-2, j2-1, -1/2);
+                offset_add(m, i2+2, j2+1, -1/2);
+                offset_add(m, i2-2, j2+1, -1/2);
+                offset_add(m, i2+2, j2-1, -1/2);
+                offset_add(m, i2-1, j2-2, 1/2);
+                offset_add(m, i2+1, j2+2, 1/2);
+                offset_add(m, i2-1, j2+2, 1/2);
+                offset_add(m, i2+1, j2-2, 1/2);
+                break;
+            case 3:
+                offset_add(m, i2-1, j2-1, -1);
+                offset_add(m, i2+1, j2+1, -1);
+                offset_add(m, i2-1, j2+1, 1);
+                offset_add(m, i2+1, j2-1, 1);
+                offset_add(m, i2-2, j2-2, -1);
+                offset_add(m, i2+2, j2+2, -1);
+                offset_add(m, i2-2, j2+2, 1);
+                offset_add(m, i2+2, j2-2, 1);
+                offset_add(m, i2-2, j2-1, -1/2);
+                offset_add(m, i2+2, j2+1, -1/2);
+                offset_add(m, i2-2, j2+1, 1/2);
+                offset_add(m, i2+2, j2-1, 1/2);
+                offset_add(m, i2-1, j2-2, -1/2);
+                offset_add(m, i2+1, j2+2, -1/2);
+                offset_add(m, i2-1, j2+2, 1/2);
+                offset_add(m, i2+1, j2-2, 1/2);
+                break;
+            case 1:
+                offset_add(m, i2-1, j2-1, 1);
+                offset_add(m, i2+1, j2+1, 1);
+                offset_add(m, i2-1, j2+1, -1);
+                offset_add(m, i2+1, j2-1, -1);
+                offset_add(m, i2-2, j2-2, 1);
+                offset_add(m, i2+2, j2+2, 1);
+                offset_add(m, i2-2, j2+2, -1);
+                offset_add(m, i2+2, j2-2, -1);
+                offset_add(m, i2-2, j2-1, 1/2);
+                offset_add(m, i2+2, j2+1, 1/2);
+                offset_add(m, i2-2, j2+1, -1/2);
+                offset_add(m, i2+2, j2-1, -1/2);
+                offset_add(m, i2-1, j2-2, 1/2);
+                offset_add(m, i2+1, j2+2, 1/2);
+                offset_add(m, i2-1, j2+2, -1/2);
+                offset_add(m, i2+1, j2-2, -1/2);
+                break;
             }
         }
     }
@@ -216,40 +200,24 @@ function to_color1(x, xmax){
 }
 
 function to_color2(x, y, xmax){
-    //let r = x / xmax * 0.5 + 0.5;
-    ////let g = y / xmax * 0.5 + 0.5;
-    //let g = (x + y) / xmax * 0.25 + 0.5;
-    //let b = y / xmax * 0.5 + 0.5;
     let r = x / xmax;
     let g = (x + y) / xmax * 0.5;
     let b = y / xmax;
-    r = Math.min(Math.max(r, 0), 1);
-    g = Math.min(Math.max(g, 0), 1);
-    b = Math.min(Math.max(b, 0), 1);
-    r = 1 - r;
-    g = 1 - g;
-    b = 1 - b;
-
+    r = 1 - Math.min(Math.max(r, 0), 1);
+    g = 1 - Math.min(Math.max(g, 0), 1);
+    b = 1 - Math.min(Math.max(b, 0), 1);
 
     let color = '#';
     color += Math.floor(r * 255).toString(16).padStart(2, '0');
     color += Math.floor(g * 255).toString(16).padStart(2, '0');
     color += Math.floor(b * 255).toString(16).padStart(2, '0');
     return color
-
 }
-
-function getMax(a){
-    return Math.max(...a.map(e => Array.isArray(e) ? getMax(e) : Math.log(e * e + 1)));
-  }
 
 function print_background(board){
     const zmax = Math.log(65);
     let str = "";
     let plot_data = document.getElementById("plot_data").value;
-    if (plot_data == "None"){
-        return str;
-    }
     let n = board.length;
     let emode = get2d(n*2+1);
     let bmode = get2d(n*2+1);
@@ -265,26 +233,29 @@ function print_background(board){
             let y = i / 2 - 0.25;
             let color = ''
             switch(plot_data){
-                case "E&B Power":
-                    color = to_color2(Math.log(zb * zb + 1), Math.log(ze * ze + 1), zmax);
-                    break;
-                case "E-mode Amp":
-                    color = to_color1(ze, 8.);
-                    break;
-                case "B-mode Amp":
-                    color = to_color1(zb, 8.);
-                    break;
+            case "E&B Power":
+                color = to_color2(Math.log(zb * zb + 1), Math.log(ze * ze + 1), zmax);
+                break;
+            case "E-mode Amp":
+                color = to_color1(ze, 8.);
+                break;
+            case "B-mode Amp":
+                color = to_color1(zb, 8.);
+                break;
+            default:
+                color = "white";
+                break;
             }
             str += `<rect x="${x}" y="${y}" width="0.5" height="0.5" fill="${color}"/>`;
             e_score += ze * ze;
             b_score += zb * zb;
         }
     }
+    if (plot_data == "None") return "";
     return str;
 }
 
 function print_selected(){
-    console.log(i_selected);
     let str = "";
     if (i_selected == -1 || j_selected == -1){
         return str;
@@ -323,13 +294,11 @@ function print_selected(){
     return str;
 }
 
-function print_table(board){
+function print_table(){
     const ul = 100;
     let n = board.length;
-    //let zmax = Math.max(getMax(emode), getMax(bmode));
-
-    let width = ul * n
-    str = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${width}" viewBox="-0.015 -0.015 ${n + 0.015} ${n + 0.015}">`;
+    let width = ul * n;
+    str = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${width}" viewBox="-0.015 -0.015 ${n + 0.03} ${n + 0.03}">`;
     str += `<rect x="0" y="0" width="${n}" height="${n}" fill="#FFFFFF"/>`;
     str += print_background(board);
     for (let i=0; i < n; i++){
@@ -338,64 +307,65 @@ function print_table(board){
             y0 = i + 0.5;
             z = board[i][j];
             switch(z){
-                case 1:
-                    x1 = x0 + 0.5;x2 = x0 - 0.5; y1 = y0; y2 = y0;
-                    str += `<line class="st1" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" />`;
-                    break;
-                case 2:
-                    x1 = x0 + 0.35;x2 = x0 - 0.35; y1 = y0 + 0.35; y2 = y0 - 0.35;
-                    str += `<line class="st1" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" />`;
-                    break;
-                case 3:
-                    x1 = x0;x2 = x0; y1 = y0 + 0.5; y2 = y0 - 0.5;
-                    str += `<line class="st1" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" />`;
-                    break;
-                case 4:
-                    x1 = x0 - 0.35;x2 = x0 + 0.35; y1 = y0 + 0.35; y2 = y0 - 0.35;
-                    str += `<line class="st1" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" />`;
-                    break;
-                default:
+            case 1:
+                x1 = x0 + 0.5;x2 = x0 - 0.5; y1 = y0; y2 = y0;
+                break;
+            case 2:
+                x1 = x0 + 0.35;x2 = x0 - 0.35; y1 = y0 + 0.35; y2 = y0 - 0.35;
+                break;
+            case 3:
+                x1 = x0;x2 = x0; y1 = y0 + 0.5; y2 = y0 - 0.5;
+                break;
+            case 4:
+                x1 = x0 - 0.35;x2 = x0 + 0.35; y1 = y0 + 0.35; y2 = y0 - 0.35;
+                break;
+            default:
+                continue;
             }
+            let color = "black";
+            if (i == i_last && j == j_last) color = (n_open % 2 == 0) ? "blue" : "green";
+            str += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="0.05"/>`;
         }
     }
-    //for (let i=0; i < n + 1; i++){
-    //    str += `<line x1="${i}" y1="0" x2="${i}" y2="${n}" stroke="black" stroke-width="0.01"/>`
-    //    str += `<line x1="0" y1="${i}" x2="${n}" y2="${i}" stroke="black" stroke-width="0.01"/>`
-    //}
     for (let i=0; i < n; i++){
         for (let j=0; j < n; j++){
             str += `<rect x="${j}" y="${i}" width="1" height="1" fill="transparent" stroke="black" stroke-width="0.01" onclick="on_click_cell(${i},${j});" />`
         }
     }
     str += print_selected();
-    str+="</svg>"
+    str += "</svg>"
     let target = document.getElementById("board");
     target.innerHTML = "";
     target.innerHTML += str;
-    //return str
     print_score();
 }
 
 function print_score(){
-    let target = document.getElementById("score");
-    let str = "";
-    str += `<p>E-mode score: ${e_score}</p>`
-    str += `<p>B-mode score: ${b_score}</p>`
-    target.innerHTML = str;
+    let e_str = `E-mode score: ${e_score}`;
+    let b_str = `B-mode score: ${b_score}`;
+    if (n_open == 0){
+        if (e_score > b_score) {
+            e_str += " <b>Win!</b>";
+        } else if (e_score < b_score) {
+            b_str += " <b>Win!</b>";
+        } else {
+            e_str += " Draw";
+            b_str += " Draw";
+        }
+    }
+    document.getElementById("e_score").innerHTML = e_str;
+    document.getElementById("b_score").innerHTML = b_str;
 }
 
 function on_click_start(){
-    let target = document.getElementById("board");
     let n = Number(document.getElementById("board_size").value);
     i_selected = -1;
     j_selected = -1;
+    i_last = -1;
+    j_last = -1;
+    n_open = n * n;
     board = get2d(n);
-    print_table(board);
-}
-function on_click_bg(){
-    i_selected = -1;
-    j_selected = -1;
-    print_table(board);
+    print_table();
 }
 
 function on_click_cell(i, j){
@@ -406,58 +376,67 @@ function on_click_cell(i, j){
         i_selected = -1;
         j_selected = -1;
     }
-    print_table(board);
+    print_table();
 }
 
 function on_click_select(i, j, z){
+    if (board[i][j] == 0 && z > 0){
+        n_open -= 1;
+    } else if (board[i][j] > 0 && z == 0){
+        n_open += 1;
+    }
     board[i][j] = z;
     i_selected = -1;
     j_selected = -1;
-    print_table(board);
+    i_last = i;
+    j_last = j;
+    print_table();
 }
 
 function on_click_pc(){
     let n = board.length;
-    let n_open = 0;
+    //let n_open = 0;
     let pc_mode = document.getElementById("pc_mode").value;
-    for (let i=0; i < n; i++){
-        for (let j=0; j < n; j++){
-            if (board[i][j] == 0){n_open += 1;}
-        }
-    }
-    if (n_open == 0){
-        console.log("No open panel.");
-        return;
-    }
+    //for (let i=0; i < n; i++){
+    //    for (let j=0; j < n; j++){
+    //        if (board[i][j] == 0) n_open += 1;
+    //    }
+    //}
+    if (n_open == 0) return;
+    n_open -= 1;
+    i_selected = -1;
+    j_selected = -1;
     switch(pc_mode){
-        case "L0 Random":
-            pc_random();
-            break;
-        case "L1 E-mode":
-            pc_level1(1);
-            break;
-        case "L1 B-mode":
-            pc_level1(-1);
-            break;
-        case "L2 E-mode":
-            pc_level2(1);
-            break;
-        case "L2 B-mode":
-            pc_level2(-1);
-            break;
+    case "L0 Random":
+        pc_random();
+        break;
+    case "L1 E-mode":
+        pc_level1(1);
+        break;
+    case "L1 B-mode":
+        pc_level1(-1);
+        break;
+    case "L2 E-mode":
+        pc_level2(1);
+        break;
+    case "L2 B-mode":
+        pc_level2(-1);
+        break;
     }
-    print_table(board);
+    print_table();
 }
 
 function pc_random(){
     let n = board.length;
     while (true){
-        i = Math.floor(Math.random() * n);
-        j = Math.floor(Math.random() * n);
+        let i = Math.floor(Math.random() * n);
+        let j = Math.floor(Math.random() * n);
         if (board[i][j] > 0){
             continue;
         }
         board[i][j] = Math.floor(Math.random() * 4) + 1;
+        i_last = i;
+        j_last = j;
         break;
     }
 }
@@ -467,9 +446,7 @@ function pc_level1(eb){
     while (true){
         let i = Math.floor(Math.random() * n);
         let j = Math.floor(Math.random() * n);
-        if (board[i][j] > 0){
-            continue;
-        }
+        if (board[i][j] > 0) continue;
         let e_score = get1d(4);
         let kmax = 0;
         for (let k=0; k < 4; k++){
@@ -489,13 +466,14 @@ function pc_level1(eb){
             }
         }
         board[i][j] = kmax + 1;
+        i_last = i;
+        j_last = j;
         break;
     }
 }
 
 function pc_level2(eb){
     let n = board.length;
-
     let imax = 0;
     let jmax = 0;
     let kmax = 0;
@@ -503,9 +481,7 @@ function pc_level2(eb){
 
     for (let i=0; i < n; i++){
         for (let j=0; j < n; j++){
-            if (board[i][j] > 0){
-                continue;
-            }
+            if (board[i][j] > 0) continue;
             for (let k=1; k < 5; k++){
                 board[i][j] = k;
                 let emode = get2d(n*2+1);
@@ -537,4 +513,8 @@ function pc_level2(eb){
         }
     }
     board[imax][jmax] = kmax;
+    i_last = imax;
+    j_last = jmax;
 }
+
+on_click_start();
