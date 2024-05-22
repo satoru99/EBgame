@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>E-mode B-mode game</title>
+  <style>
+    .st1{
+        stroke:black;
+        stroke-width: 0.03;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>E-mode B-mode game</h1>
+  Size: <input id="board_size" type="text" value="4" style="width:20px;" />
+  <input type="button" value="Start" onclick="on_click_start();"/></br>
+  Plot: <select id="plot_data" onchange="print_table();">
+    <option value="E&B Power">E&amp;B Power</option>
+    <option value="E-mode Amp">E-mode Amp</option>
+    <option value="B-mode Amp">B-mode Amp</option>
+    <option value="None">None</option>
+  </select></br>
+  PC: <select id="pc_mode">
+    <option value="L0 Random">Level 0: Random</option>
+    <option value="L1 E-mode">Level 1: E-mode</option>
+    <option value="L1 B-mode">Level 1: B-mode</option>
+    <option value="L2 E-mode">Level 2: E-mode</option>
+    <option value="L2 B-mode">Level 2: B-mode</option>
+  </select>
+  <input type="button" value="Next" onclick="on_click_pc();"/></br>
+  <div id="e_score" style="color:#FF8000"></div>
+  <div id="b_score" style="color:#0080FF"></div>
+  <div id="board"></div>
+  <script src="script.js"></script>
+</body>
+
+</html>
